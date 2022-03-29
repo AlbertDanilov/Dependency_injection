@@ -1,3 +1,5 @@
+using Dependency_injection.Extensions;
+using Dependency_injection.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,26 +11,43 @@ namespace Dependency_injection
 {
     public class Startup
     {
-        private IServiceCollection _services;
+        //private IServiceCollection _services;
 
         public void ConfigureServices(IServiceCollection services)
         {
             //var servs = services.ToList(); //встроенные сервисы фреймворка
 
-            services.AddMvc(); //регистрация дополнительных встроенных сервисов ASP.NET Core, например MVC
-            _services = services;
+            //services.AddMvc(); //регистрация дополнительных встроенных сервисов ASP.NET Core, например MVC
+            //_services = services;
 
+            //services.AddTransient<IMessageSender, EmailMessageSender>();
+            //services.AddTransient<IMessageSender, SmsMessageSender>();
+
+            //services.AddTransient<TimeService>();
+            services.AddTimeService();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        //public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMessageSender messageSender)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TimeService timeService)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseRouting();
+            //app.Run(async (context) =>
+            //{
+            //    await context.Response.WriteAsync(messageSender.Send());
+            //});
+
+            app.Run(async (context) =>
+            {
+                context.Response.ContentType = "text/html; charset=utf-8";
+                await context.Response.WriteAsync($"Time: {timeService?.GetTime()}");
+            });
+
+            //app.UseRouting();
 
             //app.UseEndpoints(endpoints =>
             //{
@@ -38,24 +57,24 @@ namespace Dependency_injection
             //    });
             //});
 
-            app.Run(async context =>
-            {
-                var sb = new StringBuilder();
-                sb.Append("<h1>Все сервисы</h1>");
-                sb.Append("<table>");
-                sb.Append("<tr><th>Тип</th><th>Lifetime</th><th>Реализация</th></tr>");
-                foreach (var svc in _services)
-                {
-                    sb.Append("<tr>");
-                    sb.Append($"<td>{svc.ServiceType.FullName}</td>");
-                    sb.Append($"<td>{svc.Lifetime}</td>");
-                    sb.Append($"<td>{svc.ImplementationType?.FullName}</td>");
-                    sb.Append("</tr>");
-                }
-                sb.Append("</table>");
-                context.Response.ContentType = "text/html;charset=utf-8";
-                await context.Response.WriteAsync(sb.ToString());
-            });
+            //app.Run(async context =>
+            //{
+            //    var sb = new StringBuilder();
+            //    sb.Append("<h1>Все сервисы</h1>");
+            //    sb.Append("<table>");
+            //    sb.Append("<tr><th>Тип</th><th>Lifetime</th><th>Реализация</th></tr>");
+            //    foreach (var svc in _services)
+            //    {
+            //        sb.Append("<tr>");
+            //        sb.Append($"<td>{svc.ServiceType.FullName}</td>");
+            //        sb.Append($"<td>{svc.Lifetime}</td>");
+            //        sb.Append($"<td>{svc.ImplementationType?.FullName}</td>");
+            //        sb.Append("</tr>");
+            //    }
+            //    sb.Append("</table>");
+            //    context.Response.ContentType = "text/html;charset=utf-8";
+            //    await context.Response.WriteAsync(sb.ToString());
+            //});
         }
     }
 }
