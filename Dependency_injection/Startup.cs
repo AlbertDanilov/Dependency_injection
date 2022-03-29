@@ -1,4 +1,6 @@
+using Dependency_injection.Classes;
 using Dependency_injection.Extensions;
+using Dependency_injection.Middlewares;
 using Dependency_injection.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,31 +23,43 @@ namespace Dependency_injection
             //_services = services;
 
             //services.AddTransient<IMessageSender, EmailMessageSender>();
+            //services.AddTransient<MessageService>();
+
             //services.AddTransient<IMessageSender, SmsMessageSender>();
 
             //services.AddTransient<TimeService>();
-            services.AddTimeService();
+            //services.AddTimeService();
+
+            services.AddTransient<IMessageSender, EmailMessageSender>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app)
+        //public void Configure(IApplicationBuilder app, MessageService messageSender)
         //public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMessageSender messageSender)
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TimeService timeService)
+        //public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TimeService timeService)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseDeveloperExceptionPage();
+            //}
+
+            app.UseMiddleware<MessageMiddleware>();
 
             //app.Run(async (context) =>
             //{
+            //    //IMessageSender messageSender = context.RequestServices.GetService<IMessageSender>();
+            //    IMessageSender messageSender = app.ApplicationServices.GetService<IMessageSender>();
+            //    context.Response.ContentType = "text/html;charset=utf-8";
             //    await context.Response.WriteAsync(messageSender.Send());
             //});
 
-            app.Run(async (context) =>
-            {
-                context.Response.ContentType = "text/html; charset=utf-8";
-                await context.Response.WriteAsync($"Time: {timeService?.GetTime()}");
-            });
+            //app.Run(async (context) =>
+            //{
+            //    context.Response.ContentType = "text/html; charset=utf-8";
+            //    await context.Response.WriteAsync($"Time: {timeService?.GetTime()}");
+            //});
 
             //app.UseRouting();
 
